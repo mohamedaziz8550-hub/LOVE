@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متحف ذكريات مريومتي 💖</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0d0914;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-modal {
+            background: #120c1d;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .card-border-gradient-1 { border-left: 4px solid #f59e0b; }
+        .card-border-gradient-2 { border-left: 4px solid #ec4899; }
+        .card-border-gradient-3 { border-left: 4px solid #8b5cf6; }
+        .card-border-gradient-4 { border-left: 4px solid #f43f5e; }
+
+        /* Flip Cards */
+        .flip-card { perspective: 1000px; }
+        .flip-card-inner { transition: transform 0.8s; transform-style: preserve-3d; }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .flip-card-back { transform: rotateY(180deg); }
+
+        /* Lightbox & Zoom transition */
+        #lightbox-img {
+            transition: transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 md:p-12 relative pb-20" onclick="enableAudioOnFirstTouch()">
+
+    <!-- Background Audio -->
+    <audio id="bg-audio" loop preload="auto">
+        <source src="audio/music.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Top Music Button -->
+    <div class="fixed top-4 right-4 z-40">
+        <button onclick="toggleAudio(event)" class="glass-panel px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/10 transition border border-rose-400/30 text-xs sm:text-sm">
+            <i id="audio-icon" class="fa-solid fa-music text-amber-400"></i>
+            <span id="audio-status">تشغيل الموسيقى 🎵</span>
+        </button>
+    </div>
+
+    <div class="max-w-5xl mx-auto pt-4">
+        
+        <!-- Header -->
+        <header class="text-center my-8">
+            <div class="text-5xl mb-3">💛</div>
+            <h1 class="text-4xl sm:text-5xl font-black text-amber-200 mb-4">متحف ذكريات مريومتي</h1>
+            <p class="text-gray-300 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+                منوره يا مريومتي في متحفك الخاص بتاعك ي حبيبتي.. كل مكان هنا كتبت في عن أجمل وأشطر واحلى بنوتة في الدنيا!
+            </p>
+        </header>
+
+        <!-- Important Dates Cards Section -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+            <div class="glass-panel p-4 rounded-2xl text-center border border-rose-400/30">
+                <span class="text-xs text-rose-300 font-bold block mb-1">✨ أول يوم اتكلمنا فيه</span>
+                <span class="text-xl font-bold text-amber-200">23 / 7 / 2025</span>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl text-center border border-amber-400/30">
+                <span class="text-xs text-amber-300 font-bold block mb-1">👀 آخر مرة شوفت عيونك 👁️👁️</span>
+                <span class="text-xl font-bold text-rose-300">24 / 9 / 2026</span>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl text-center border border-purple-400/30">
+                <span class="text-xs text-purple-300 font-bold block mb-1">👑 اليوم اللي اتولدت فيه أميرتي</span>
+                <span class="text-xl font-bold text-amber-300">21 / 10 / 2008</span>
+            </div>
+        </div>
+
+        <!-- Live Love Counter Section -->
+        <div class="glass-panel p-6 rounded-3xl mb-12 border border-rose-500/30 text-center shadow-xl">
+            <h3 class="text-lg font-bold text-amber-300 mb-4">⌛ بقالنا سوا من يوم ما عرفتك:</h3>
+            <div id="love-counter" class="grid grid-cols-4 gap-2 text-center max-w-md mx-auto">
+                <div class="glass-panel p-3 rounded-2xl">
+                    <span id="days" class="text-2xl sm:text-3xl font-black text-rose-400 block">0</span>
+                    <span class="text-xs text-gray-300">يوم</span>
+                </div>
+                <div class="glass-panel p-3 rounded-2xl">
+                    <span id="hours" class="text-2xl sm:text-3xl font-black text-amber-300 block">0</span>
+                    <span class="text-xs text-gray-300">ساعة</span>
+                </div>
+                <div class="glass-panel p-3 rounded-2xl">
+                    <span id="minutes" class="text-2xl sm:text-3xl font-black text-purple-300 block">0</span>
+                    <span class="text-xs text-gray-300">دقيقة</span>
+                </div>
+                <div class="glass-panel p-3 rounded-2xl">
+                    <span id="seconds" class="text-2xl sm:text-3xl font-black text-pink-400 block">0</span>
+                    <span class="text-xs text-gray-300">ثانية</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Title -->
+        <div class="flex items-center gap-2 mb-8 mt-12">
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">أجنحة المتحف</h2>
+            <span class="text-2xl text-amber-400">🧭</span>
+        </div>
+
+        <!-- Grid Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            
+            <!-- قاعة 01 -->
+            <div onclick="openModal('room1-modal')" class="glass-panel card-border-gradient-1 rounded-2xl p-6 cursor-pointer hover:bg-white/[0.06] transition-all duration-300 flex flex-col justify-between min-h-[200px]">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs text-gray-400 font-mono tracking-widest">قـا عـة 01</span>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-300 text-lg">📜</div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">حكاية البداية</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">عن أول اللحظات، التفاصيل الصغيرة اللي بدأت بيها أجمل حكاية في حياتنا...</p>
+                </div>
+                <div class="mt-6 flex items-center text-rose-400 text-sm font-bold gap-2">
+                    <span>دوسي عشان تخشي القاعة</span>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </div>
+
+            <!-- قاعة 02 -->
+            <div onclick="openModal('room2-modal')" class="glass-panel card-border-gradient-2 rounded-2xl p-6 cursor-pointer hover:bg-white/[0.06] transition-all duration-300 flex flex-col justify-between min-h-[200px]">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs text-gray-400 font-mono tracking-widest">قـا عـة 02</span>
+                        <div class="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center text-amber-300 text-lg">☀️</div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">سر الشطارة والنجاح</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">مكان مخصص لشطارتك، وحلاوتك، وي لكل حاجه بتعمليها وبيبقى فخور بيكي فيها!</p>
+                </div>
+                <div class="mt-6 flex items-center text-rose-400 text-sm font-bold gap-2">
+                    <span>دوسي عشان تشوفي القاعة</span>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </div>
+
+            <!-- قاعة 03 -->
+            <div onclick="openModal('room3-modal')" class="glass-panel card-border-gradient-3 rounded-2xl p-6 cursor-pointer hover:bg-white/[0.06] transition-all duration-300 flex flex-col justify-between min-h-[200px]">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs text-gray-400 font-mono tracking-widest">قـا عـة 03</span>
+                        <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-300 text-lg">📸</div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">ضحكتك والذكريات</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">البوم صور مع حبيبتي اللي بتنور الدنيا حوليا...</p>
+                </div>
+                <div class="mt-6 flex items-center text-rose-400 text-sm font-bold gap-2">
+                    <span>دوسي لدخول القاعة</span>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </div>
+
+            <!-- قاعة 04 -->
+            <div onclick="openModal('room4-modal')" class="glass-panel card-border-gradient-4 rounded-2xl p-6 cursor-pointer hover:bg-white/[0.06] transition-all duration-300 flex flex-col justify-between min-h-[200px]">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs text-gray-400 font-mono tracking-widest">قـا عـة 04</span>
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-300 text-lg">💌</div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">صندوق أسباب حبي ليكي</h3>
+                    <p class="text-gray-300 text-sm leading-relaxed">فيها أسباب صغيرة بتبين قد إيه أنتي مميزة وغالية عندي جداً...</p>
+                </div>
+                <div class="mt-6 flex items-center text-rose-400 text-sm font-bold gap-2">
+                    <span>دوسي عشان تخشي القاعة</span>
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Birthday Surprise Button -->
+        <div class="text-center my-12">
+            <button onclick="triggerBirthdaySurprise()" class="px-8 py-4 bg-gradient-to-r from-amber-400 via-rose-500 to-purple-600 text-white text-lg font-black rounded-full shadow-2xl hover:scale-105 transform transition-all duration-300 animate-pulse">
+                👑 دوسي هنا عشان تشوفي مفاجأة عيدميلاد احلى بنوته 🎁
+            </button>
+        </div>
+
+    </div>
+
+    <!-- MODAL 01 -->
+    <div id="room1-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-modal p-6 sm:p-8 rounded-3xl max-w-xl w-full relative text-center max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('room1-modal')" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-3xl mb-2">📜</div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-amber-200 mb-6">حكاية البداية </h3>
+            <div class="mb-6 rounded-2xl overflow-hidden border border-white/10 cursor-pointer" onclick="openLightbox('images/photo1.jpg')">
+                <img src="images/photo1.jpg" alt="بدايتنا" class="w-full h-64 object-cover hover:scale-105 transition">
+            </div>
+            <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-6 text-right sm:text-center">
+                يا مريومتي، لو نرجع بالوقت للبداية اول ما عرفتك ي مزتي، كانت كل حاجه بتقول عكس اللي هنبق في بس الموضوع كان في سحر غريب سحر عيونك اكيد.. كل كلمة، كل ضحكة بيننا كانت بتبني حب كبير ليكي جوا قلبي وكل مره يكبر مع الوقت وبقيت بدمنك وبقيتي أحلى جزء في يومي.
+                <br><br>
+                المتحف ده مش مجرد مكان ده حاجه تثبت حبي اللي ليكي في قلبي. أنتي الشخص اللي وجوده بيطمن وبيخلي كل حاجة صعبة تهون ع الواحد وتعب كل حاجه بيروح وانا بكلمك.
+            </p>
+            <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-400/30 text-amber-200 text-sm font-medium leading-relaxed">
+                " أجمل صدفه هي فعلا اللي بتجيب لينا أشخاص بيبقوا هما كل أوقاتنا الحلوة وانتي بقيتي كل أوقاتي الحلوه."
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 02 -->
+    <div id="room2-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-modal p-6 sm:p-8 rounded-3xl max-w-xl w-full relative text-center max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('room2-modal')" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-3xl mb-2">☀️</div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-amber-200 mb-6">أشطر مريومة في الدنيا</h3>
+            <div class="mb-6 rounded-2xl overflow-hidden border border-white/10 cursor-pointer" onclick="openLightbox('images/photo2.jpg')">
+                <img src="images/photo2.jpg" alt="شطارتك" class="w-full h-64 object-cover hover:scale-105 transition">
+            </div>
+            <p class="text-gray-300 text-sm sm:text-base leading-relaxed mb-8 text-right sm:text-center">
+                القاعة دي معموله لكل لحظة تعبتي فيها من ترويق مثلا او حاجات بتعمليها ليهم او ل اخواتك دايما بقولك تسلم ايدك عارف انها مجرد جمله بس بكون حابب اعرفك ان انا مقدر تعبك ف الحاجات دي حتي لو هما مش مقدرين وبفضل فخور بيكي في كل وقت ي حبيبتي والله!
+                <br><br>
+                مهما كانت اللي بتعدي بي صعب، انا هبق معاكي و هتطلعي منه و هنعديه مع بعض ي احلى حاجه ف حياتي. وعمررررررررررري ما هخذلك ف حاجه ولله .
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <div class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-rose-300 text-xs sm:text-sm font-bold">✨ بحبك للأبد</div>
+                <div class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-amber-300 text-xs sm:text-sm font-bold">👑 أشطر ست بيت ف الدنيا بحبك</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 03: 26 GALLERY PHOTOS -->
+    <div id="room3-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-modal p-6 sm:p-8 rounded-3xl max-w-5xl w-full relative text-center max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('room3-modal')" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-3xl mb-1">📸</div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-white mb-1">معرض اللحظات والضحكات (26 ذكرى)</h3>
+            <p class="text-xs text-amber-300 mb-6"> دوسي على أي صورة عشان تتفتح وتعمليzom in \ zom ouy براحتك! ✨</p>
+
+            <!-- 26 Photos Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <script>
+                    for(let i = 1; i <= 26; i++) {
+                        document.write(`
+                            <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5 h-36 cursor-pointer hover:border-amber-400 transition" onclick="openLightbox('images/photo${i}.jpg')">
+                                <img src="images/photo${i}.jpg" class="w-full h-full object-cover hover:scale-110 transition duration-300" onerror="this.src='https://via.placeholder.com/300?text=Photo+${i}'">
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 04 -->
+    <div id="room4-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div class="glass-modal p-6 sm:p-8 rounded-3xl max-w-2xl w-full relative text-center max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('room4-modal')" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-300 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-3xl mb-2">💌</div>
+            <h3 class="text-2xl sm:text-3xl font-extrabold text-rose-300 mb-6">صندوق أسباب حبي ليكي</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-right">
+                <div class="flip-card h-36 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative w-full h-full text-center">
+                        <div class="flip-card-front absolute inset-0 glass-panel rounded-2xl flex items-center justify-center p-4 border border-rose-400/30 text-rose-300 font-bold">السبب الأول ❤️ (دوسي هنا)</div>
+                        <div class="flip-card-back absolute inset-0 bg-gradient-to-br from-rose-600 to-pink-600 rounded-2xl flex items-center justify-center p-4 text-white text-xs font-medium">عشان وجودك جمبي بيهون عليا أي حاجة صعبة، وضحكتك بتنسي اي حاجه مضيقاني 🌸</div>
+                    </div>
+                </div>
+
+                <div class="flip-card h-36 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative w-full h-full text-center">
+                        <div class="flip-card-front absolute inset-0 glass-panel rounded-2xl flex items-center justify-center p-4 border border-amber-400/30 text-amber-300 font-bold">السبب الثاني 🔥 (دوسي هنا)</div>
+                        <div class="flip-card-back absolute inset-0 bg-gradient-to-br from-purple-600 to-rose-600 rounded-2xl flex items-center justify-center p-4 text-white text-xs font-medium">عشان حلاوت امك دي يبت ي مزه انتي يخربيت جمالك بدوب في ازاي محبكيش وانتي بطل كدا وكل حاجه فيكي اجمد من التانيه عيونك وملامحك وشفايفك اللي ببق عاوز ابوسها و رفعك و........... حاجات تانيه كتير من غير ما نخش ف تفاصيل قلت ادب و عيب! 🌟</div>
+                    </div>
+                </div>
+
+                <div class="flip-card h-36 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative w-full h-full text-center">
+                        <div class="flip-card-front absolute inset-0 glass-panel rounded-2xl flex items-center justify-center p-4 border border-purple-400/30 text-purple-300 font-bold">السبب الثالث 😊 (دوسي هنا)</div>
+                        <div class="flip-card-back absolute inset-0 bg-gradient-to-br from-amber-600 to-rose-600 rounded-2xl flex items-center justify-center p-4 text-white text-xs font-medium">عشان انتي احلى حاجه انا عرفتها ف حياتي واجمل ولله انتي متعرفيش انا بحبك قد اي انتي بنتي وحبيبتي واختي ومراتي وكل حاجه ليا انا بحبك اوي المفروض دا سبب من اسباب اني بحبك بس سبب حبي اني بحبك معرفش ازاي عديها بق! ✨</div>
+                    </div>
+                </div>
+
+                <div class="flip-card h-36 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner relative w-full h-full text-center">
+                        <div class="flip-card-front absolute inset-0 glass-panel rounded-2xl flex items-center justify-center p-4 border border-amber-400/30 text-amber-200 font-bold">السبب الرابع 💖 (دوسي هنا)</div>
+                        <div class="flip-card-back absolute inset-0 bg-gradient-to-br from-rose-500 to-purple-700 rounded-2xl flex items-center justify-center p-4 text-white text-xs font-medium">عشان بجد مفيش حد شبهك ولا ييجي زيك في الدنيا كلها ولا هيجي! 🌹</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX FOR IMAGE ZOOM IN / OUT -->
+    <div id="lightbox" class="fixed inset-0 z-[100] hidden bg-black/95 flex flex-col items-center justify-center p-4">
+        <!-- Control buttons -->
+        <div class="absolute top-4 right-4 flex gap-3 z-10">
+            <button onclick="zoomIn()" class="w-10 h-10 rounded-full bg-white/20 text-white hover:bg-white/40 flex items-center justify-center text-lg"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+            <button onclick="zoomOut()" class="w-10 h-10 rounded-full bg-white/20 text-white hover:bg-white/40 flex items-center justify-center text-lg"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+            <button onclick="resetZoom()" class="w-10 h-10 rounded-full bg-white/20 text-white hover:bg-white/40 flex items-center justify-center text-lg"><i class="fa-solid fa-rotate-left"></i></button>
+            <button onclick="closeLightbox()" class="w-10 h-10 rounded-full bg-rose-500 text-white hover:bg-rose-600 flex items-center justify-center text-lg"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="overflow-hidden w-full h-full flex items-center justify-center">
+            <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain cursor-grab">
+        </div>
+    </div>
+
+    <!-- Birthday Celebration Overlay -->
+    <div id="birthday-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl">
+        <div class="glass-modal max-w-3xl w-full p-8 sm:p-12 rounded-3xl relative text-center border-2 border-amber-400 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeBirthdayOverlay()" class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-amber-200 hover:bg-rose-500/50 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-6xl mb-4 animate-bounce">👑🎉</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-rose-300 to-amber-400 mb-6">كل سنة وأنتي طيبة يا مريومتي! ✨</h2>
+            <div class="text-gray-200 text-sm sm:text-base leading-relaxed space-y-4 max-w-2xl mx-auto my-6 text-right sm:text-center">
+                <p>اليوم ده مش مجرد عيد ميلاد عادي، ده اليوم اللي اتولدت فيه أجمل حاجة في حياتي!</p>
+                <p>اول عيدميلاد يجي واكون حبيبك و ان شاء الله كل عيد ميلاد هيبق كدا واعملك هديه زي دي او زي اللي جايبها ليكي كدا كدا وانتي بتقري المفروض هديت معاكي ولله انا استاهل ع الكلام دا مش مجرد بوسه دي بوسه ف الحقيقه ولله ان شاء الله الهديه هتعجبك يارب عشانلو لا هتقهر و ي حبيبتي بتمنى لك سنة حلوه وانتي معايا مليانة فرحة تملى قلبك الحنين دا، وتتحقق فيها كل الأحلام اللي بتتمنيها وزيادة. دايماً تفضلي منورة فعيوني عشان انا عيوني بتشوفك غير اي ما حد بيشوفك بقعد اعاكسك تقولي مش للدرجه دي لا للدرجه دي عشان انتي مش شايفه عيوني اللي بتعشقك بصالك ازاي ي احلى حاجه شافتها وبحبها اوي.</p>
+                <p class="font-bold text-xl text-amber-300 text-center pt-2">عقبال 10000 سنة حلوة وانتي معايا ي حبيبتي و دايماً مع بعض 💖</p>
+            </div>
+            <button onclick="triggerFireworks()" class="mt-4 px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-lg transition transform hover:scale-105">لو عاوزه صواريخ تاني غير الصاروخ اللي بتقرا الرساله! 🎆</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Handlers -->
+    <script>
+        const startDate = new Date('2025-07-23T00:00:00');
+
+        function updateLoveCounter() {
+            const now = new Date();
+            const diff = now - startDate;
+            document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            document.getElementById('minutes').innerText = Math.floor((diff / 1000 / 60) % 60);
+            document.getElementById('seconds').innerText = Math.floor((diff / 1000) % 60);
+        }
+        setInterval(updateLoveCounter, 1000);
+        updateLoveCounter();
+
+        // Audio Management
+        let isPlaying = false;
+        let hasInteracted = false;
+        const audio = document.getElementById('bg-audio');
+        const audioBtnText = document.getElementById('audio-status');
+        const audioIcon = document.getElementById('audio-icon');
+
+        function enableAudioOnFirstTouch() {
+            if (!hasInteracted) {
+                hasInteracted = true;
+                audio.play().then(() => {
+                    isPlaying = true;
+                    audioBtnText.innerText = 'إيقاف الموسيقى ⏸️';
+                    audioIcon.className = 'fa-solid fa-compact-disc text-rose-400 animate-spin';
+                }).catch(() => {});
+            }
+        }
+
+        function toggleAudio(event) {
+            if (event) event.stopPropagation();
+            hasInteracted = true;
+            if (isPlaying) {
+                audio.pause();
+                audioBtnText.innerText = 'تشغيل الموسيقى 🎵';
+                audioIcon.className = 'fa-solid fa-music text-amber-400';
+            } else {
+                audio.play().then(() => {
+                    audioBtnText.innerText = 'إيقاف الموسيقى ⏸️';
+                    audioIcon.className = 'fa-solid fa-compact-disc text-rose-400 animate-spin';
+                });
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // Modal Controls
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Lightbox & Image Zoom Logic
+        let currentScale = 1;
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        function openLightbox(src) {
+            lightboxImg.src = src;
+            currentScale = 1;
+            lightboxImg.style.transform = `scale(${currentScale})`;
+            document.getElementById('lightbox').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+        }
+
+        function zoomIn() {
+            currentScale += 0.3;
+            lightboxImg.style.transform = `scale(${currentScale})`;
+        }
+
+        function zoomOut() {
+            if (currentScale > 0.5) {
+                currentScale -= 0.3;
+                lightboxImg.style.transform = `scale(${currentScale})`;
+            }
+        }
+
+        function resetZoom() {
+            currentScale = 1;
+            lightboxImg.style.transform = `scale(${currentScale})`;
+        }
+
+        // Surprise & Fireworks
+        function triggerBirthdaySurprise() {
+            document.getElementById('birthday-overlay').classList.remove('hidden');
+            if (!isPlaying) toggleAudio();
+            triggerFireworks();
+        }
+
+        function closeBirthdayOverlay() { document.getElementById('birthday-overlay').classList.add('hidden'); }
+
+        function triggerFireworks() {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+
+                const particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    </script>
+</body>
+</html>
